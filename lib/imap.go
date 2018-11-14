@@ -182,7 +182,7 @@ func AppendNewItemsViaIMAP(items ItemsWithFolders) (ItemsWithFolders, error) {
 		}
 
 		if viper.GetBool("debug") {
-			log.Printf("Appending item to %s", folder)
+			log.Printf("Appending '%s' by '%s' to %s", entry.Item.Title, entry.FeedTitle, folder)
 		}
 
 		literal := bytes.NewReader(msg.Bytes())
@@ -190,6 +190,12 @@ func AppendNewItemsViaIMAP(items ItemsWithFolders) (ItemsWithFolders, error) {
 		if err == nil {
 			// TODO intercept error
 			i = append(i, entry)
+		} else {
+			log.Printf("Error on connection. Restarting client")
+			client, err = newIMAPClient()
+			if err != nil {
+				return nil, err
+			}
 		}
 
 	}
