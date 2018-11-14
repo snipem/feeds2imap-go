@@ -81,6 +81,17 @@ func fetchFeedData(urls FlatURLs) (FeedsWithFolders, error) {
 				return
 			}
 
+			if folder == "full" {
+				log.Printf("Using mercury to get full content")
+				for _, item := range feed.Items {
+					log.Printf("Fetching full text for '%s' (%s)", item.Title, item.Link)
+					item.Description, err = GetFullText(item.Link)
+					if err != nil {
+						log.Fatal(err)
+					}
+				}
+			}
+
 			parsedLock.Lock()
 			defer parsedLock.Unlock()
 			parsed = append(parsed, FeedWithFolder{Feed: feed, Folder: folder})
