@@ -87,7 +87,7 @@ func fetchFeedData(urls FlatURLs) (FeedsWithFolders, error) {
 					log.Printf("Fetching full text for '%s' (%s)", item.Title, item.Link)
 					fullContent, err := GetFullText(item.Link)
 					if err != nil {
-						log.Printf("ERROR: Unable to retrieve content for %s. Error: %s", url, err)
+						log.Printf("ERROR: Unable to retrieve content for %s. Error: %s", item.Link, err)
 					} else {
 						item.Description = fullContent
 					}
