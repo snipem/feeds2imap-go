@@ -85,9 +85,11 @@ func fetchFeedData(urls FlatURLs) (FeedsWithFolders, error) {
 				log.Printf("Using mercury to get full content")
 				for _, item := range feed.Items {
 					log.Printf("Fetching full text for '%s' (%s)", item.Title, item.Link)
-					item.Description, err = GetFullText(item.Link)
+					fullContent, err := GetFullText(item.Link)
 					if err != nil {
-						log.Fatal(err)
+						log.Printf("ERROR: Unable to retrieve content for %s. Error: %s", url, err)
+					} else {
+						item.Description = fullContent
 					}
 				}
 			}
