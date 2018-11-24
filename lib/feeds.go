@@ -81,19 +81,6 @@ func fetchFeedData(urls FlatURLs) (FeedsWithFolders, error) {
 				return
 			}
 
-			if folder == "full" {
-				log.Printf("Using mercury to get full content")
-				for _, item := range feed.Items {
-					log.Printf("Fetching full text for '%s' (%s)", item.Title, item.Link)
-					fullContent, err := GetFullText(item.Link)
-					if err != nil {
-						log.Printf("ERROR: Unable to retrieve content for %s. Error: %s", item.Link, err)
-					} else {
-						item.Description = fullContent
-					}
-				}
-			}
-
 			parsedLock.Lock()
 			defer parsedLock.Unlock()
 			parsed = append(parsed, FeedWithFolder{Feed: feed, Folder: folder})
@@ -191,6 +178,20 @@ func filterNewItems(entries ItemsWithFolders) (newItems ItemsWithFolders) {
 	return
 }
 
+// FetchFullContent fetches the full content for a entry that only publishes partial content in it's feed
+func FetchFullContent(entry ItemWithFolder) ItemWithFolder {
+
+	log.Printf("Fetching full text for '%s' (%s)", entry.Item.Title, entry.Item.Link)
+	fullContent, err := GetFullText(entry.Item.Link)
+	if err != nil {
+		log.Printf("ERROR: Unable to retrieve content for %s. Error: %s", entry.Item.Link, err)
+	} else {
+		entry.Item.Description = fullContent
+	}
+
+	return entry
+}
+
 // FetchNewFeedItems loads configuration, fetches rss items and discards ones that are in cache already returning new items and new version of a cache
 func FetchNewFeedItems() ItemsWithFolders {
 	input := readInputURLsFile()
@@ -204,5 +205,14 @@ func FetchNewFeedItems() ItemsWithFolders {
 	}
 
 	allItems := flattenFeedData(parsed)
-	return filterNewItems(allItems)
+	newItems := filterNewItems(allItems)
+
+	for _, entry := range newItems {
+		// TODO Make this inline as a configuration entry not a folder name
+		if entry.Folder == "full" {
+			entry = FetchFullContent(entry)
+		}
+	}
+
+	return newItems
 }
