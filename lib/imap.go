@@ -24,7 +24,16 @@ var templateFuncs = template.FuncMap{
 
 var mailTemplate = template.Must(template.New("mail").
 	Funcs(templateFuncs).
-	Parse(`<table>
+	Parse(`<style type="text/css">
+    @media only screen and (max-width: 480px){
+        .emailImage{
+            height:auto !important;
+            max-width:600px !important;
+            width: 100% !important;
+        }
+    }
+</style>
+<table>
 <tbody>
 <tr><td>
 <a href="{{ .Link }}">{{ .Title }}</a>{{ if .Author | emptyString | not }} | {{ .Author }}{{ end }}
