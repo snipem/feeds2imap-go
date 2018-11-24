@@ -80,4 +80,5 @@ func main() {
 			time.Sleep(time.Minute * time.Duration(t))
 		}
 	}
+	log.Printf("Done")
 }
