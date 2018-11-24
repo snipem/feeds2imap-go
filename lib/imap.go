@@ -71,12 +71,15 @@ func formatContent(item *gofeed.Item) (string, error) {
 	payload.Author = formatAuthor(item)
 	payload.Link = formatLink(item.Link)
 	payload.Title = item.Title
+	var content string
 
 	if len(item.Content) > 0 {
-		payload.Content = template.HTML(item.Content)
+		content = item.Content
 	} else {
-		payload.Content = template.HTML(item.Description)
+		content = item.Description
 	}
+	content = strings.Replace(content, "<img ", "<img class='emailImage' ", -1)
+	payload.Content = template.HTML(content)
 
 	var buffer bytes.Buffer
 
