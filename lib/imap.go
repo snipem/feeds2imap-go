@@ -180,7 +180,9 @@ func AppendNewItemsViaIMAP(items ItemsWithFolders) (ItemsWithFolders, error) {
 			entry.Item.PublishedParsed = &t
 		}
 
-		folderName := entry.Folder
+		// folderName := entry.Folder
+		// FIXME: Always use feeds
+		folderName := "Feeds"
 		if viper.GetBool("imap.folder.capitalize") {
 			folderName = strings.Title(folderName)
 		}
