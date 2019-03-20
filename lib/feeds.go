@@ -182,7 +182,7 @@ func filterNewItems(entries ItemsWithFolders) (newItems ItemsWithFolders) {
 func FetchFullContent(entry ItemWithFolder) ItemWithFolder {
 
 	log.Printf("Fetching full text for '%s' (%s)", entry.Item.Title, entry.Item.Link)
-	fullContent, err := GetFullText(entry.Item.Link)
+	fullContent, err := GetFullTextReadability(entry.Item.Link)
 	if err != nil {
 		log.Printf("ERROR: Unable to retrieve content for %s. Error: %s", entry.Item.Link, err)
 	} else {
