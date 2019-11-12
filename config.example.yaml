@@ -8,9 +8,6 @@ daemon:
   # delay that daemon should wait between read/write attempts
   delay: 15
 
-mercury:
-  apiKey: secret_mercury_api_key
-
 web:
   # should run built-in http server
   enabled: true
