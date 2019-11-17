@@ -181,7 +181,8 @@ func newIMAPClient() (*client.Client, error) {
 	return c, nil
 }
 
-func appendNewItemsVia(items ItemsWithFolders, client imapClient) error {
+func appendNewItemsVia(items ItemsWithFolders, client imapClient) (ItemsWithFolders, error) {
+	var i ItemsWithFolders
 	for _, entry := range items {
 		if entry.Item.PublishedParsed == nil {
 			t := time.Now()
@@ -209,6 +210,7 @@ func appendNewItemsVia(items ItemsWithFolders, client imapClient) error {
 
 		literal := bytes.NewReader(msg.Bytes())
 		err = client.Append(folder, []string{}, *entry.Item.PublishedParsed, literal)
+
 		if err == nil {
 			// TODO intercept error
 			i = append(i, entry)
@@ -226,10 +228,10 @@ func appendNewItemsVia(items ItemsWithFolders, client imapClient) error {
 }
 
 // AppendNewItemsViaIMAP puts items in to corresponding imap folders
-func AppendNewItemsViaIMAP(items ItemsWithFolders) error {
+func AppendNewItemsViaIMAP(items ItemsWithFolders) (ItemsWithFolders, error) {
 	client, err := newIMAPClient()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer client.Logout()
 
