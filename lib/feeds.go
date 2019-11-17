@@ -1,10 +1,7 @@
 package feeds2imap
 
 import (
-	"encoding/json"
-	"io/ioutil"
 	"log"
-	"os"
 	"sync"
 	"time"
 
@@ -28,7 +25,7 @@ type FeedWithFolder struct {
 // FeedsWithFolders represents collection of FeedWithFolder
 type FeedsWithFolders []FeedWithFolder
 
-// ItemsWithFolders represents rss item (post), folder and original feed title cobined
+// ItemWithFolder represents rss item (post), folder and original feed title cobined
 type ItemWithFolder struct {
 	Item      *gofeed.Item
 	Folder    string
@@ -77,7 +74,7 @@ func fetchFeedData(urls FlatURLs) (FeedsWithFolders, error) {
 			feed, err := fp.ParseURL(url)
 
 			if err != nil {
-				log.Printf("Error while fetching %s: %s", url, err)
+				log.Printf(`Error while fetching %s "%s"`, url, err)
 				return
 			}
 
@@ -104,35 +101,6 @@ func flattenFeedData(feeds FeedsWithFolders) (items ItemsWithFolders) {
 	return
 }
 
-// ReadCacheFile reads cache file from fs
-func ReadCacheFile() ItemsCache {
-	var cache ItemsCache
-
-	fname := viper.GetString("paths.cache")
-
-	if _, err := os.Stat(fname); os.IsNotExist(err) {
-		return cache
-	}
-
-	f, err := os.Open(fname)
-
-	if err != nil {
-		log.Println(err)
-		return cache
-	}
-
-	bytes, err := ioutil.ReadAll(f)
-
-	if err != nil {
-		log.Println(err)
-		return cache
-	}
-
-	err = json.Unmarshal(bytes, &cache)
-
-	return cache
-}
-
 // CommitToCache saves item data to db
 func CommitToCache(items ItemsWithFolders) error {
 	for _, item := range items {
@@ -142,13 +110,6 @@ func CommitToCache(items ItemsWithFolders) error {
 		author := formatAuthor(i)
 		link := formatLink(i.Link)
 
-		var content string
-		if len(i.Content) > 0 {
-			content = i.Content
-		} else {
-			content = i.Description
-		}
-
 		var published time.Time
 		if i.PublishedParsed != nil {
 			published = *i.PublishedParsed
@@ -156,7 +117,17 @@ func CommitToCache(items ItemsWithFolders) error {
 			published = time.Now()
 		}
 
-		err := CommitToDB(uuid, i.GUID, i.Title, link, author, item.FeedTitle, item.FeedLink, item.Folder, content, published)
+		dbItem := &dbFeedItem{}
+		dbItem.UUID = uuid
+		dbItem.GUID = i.GUID
+		dbItem.Title = i.Title
+		dbItem.Link = link
+		dbItem.Author = author
+		dbItem.FeedTitle = item.FeedTitle
+		dbItem.FeedLink = item.FeedLink
+		dbItem.Folder = item.Folder
+		dbItem.Published = published
+		err := CommitToDB(dbItem)
 
 		if err != nil {
 			return err

@@ -1,53 +1,63 @@
 package feeds2imap
 
 import (
-	"database/sql"
 	"log"
 	"time"
 
+	"github.com/jmoiron/sqlx"
+	// go-sqlite3 imports sqlite3 driver for sql package
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/spf13/viper"
 )
 
-var db *sql.DB
+type dbFeedItem struct {
+	UUID      string    `db:"uuid"`
+	GUID      string    `db:"guid"`
+	Title     string    `db:"title"`
+	Link      string    `db:"link"`
+	Author    string    `db:"author"`
+	FeedTitle string    `db:"feedtitle"`
+	FeedLink  string    `db:"feedlink"`
+	Folder    string    `db:"folder"`
+	Published time.Time `db:"published"`
+}
 
+var db *sqlx.DB
+
+// InitDB will init sqlx sqlite3 db
 func InitDB() {
 	var err error
-	db, err = sql.Open("sqlite3", viper.GetString("paths.db"))
+	db, err = sqlx.Open("sqlite3", viper.GetString("paths.db"))
 
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
+// MigrateDB will create test db
 func MigrateDB() {
 	sqlStmt := `
-	CREATE TABLE IF NOT EXISTS feeds (uuid STRING NOT NULL PRIMARY KEY, guid STRING, title STRING, link STRING, author STRING, feedtitle STRING, feedlink STRING, folder STRING, content TEXT, published_at TIMESTAMP, read BOOL);
+	CREATE TABLE IF NOT EXISTS feeds (uuid STRING NOT NULL PRIMARY KEY, guid STRING, title STRING, link STRING, author STRING, feedtitle STRING, feedlink STRING, folder STRING, published_at TIMESTAMP);
 	CREATE INDEX IF NOT EXISTS guid_index ON feeds (guid);
-	CREATE INDEX IF NOT EXISTS folder_index ON feeds (folder);
-	CREATE INDEX IF NOT EXISTS published_index ON feeds (published_at);
-	CREATE INDEX IF NOT EXISTS read_index ON feeds (read);
 	`
 
-	_, err := db.Exec(sqlStmt)
-	if err != nil {
-		log.Fatalf("%q: %s\n", err, sqlStmt)
-	}
+	db.MustExec(sqlStmt)
 }
 
+// CloseDB will close sqlx db
 func CloseDB() {
 	if db != nil {
 		db.Close()
 	}
 }
 
-// IsExistingID tries to find maching id in db
+// IsExistingID tries to find matching id in db
 func IsExistingID(guid string) bool {
 	var count int
-	err := db.QueryRow("SELECT COUNT(*) FROM feeds WHERE guid=?;", guid).Scan(&count)
+	err := db.Get(&count, "SELECT COUNT(*) FROM feeds WHERE guid=?;", guid)
 
 	if err != nil {
-		log.Printf("Error scanning row: %s", err)
+		log.Printf("Error getting count: %s", err)
 		return false
 	}
 
@@ -59,27 +69,7 @@ func IsExistingID(guid string) bool {
 }
 
 // CommitToDB stores entry in the db
-func CommitToDB(uuid, guid, title, link, author, feedtitle, feedlink, folder, content string, time time.Time) error {
-	_, err := db.Exec("INSERT INTO feeds VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);", uuid, guid, title, link, author, feedtitle, feedlink, folder, content, time, false)
-	return err
-}
-
-// ScanRowToItem scans a single row into a struct
-func ScanRowToItem(rows *sql.Rows) (i dbFeedItem, err error) {
-	err = rows.Scan(&i.UUID, &i.GUID, &i.Title, &i.Link, &i.Author, &i.FeedTitle, &i.FeedLink, &i.Folder, &i.Content, &i.Published, &i.Read)
-
-	return i, err
-}
-
-// MarkAsReadInDB sets read field to true on the given id
-func MarkAsReadInDBByID(uuid string) error {
-	_, err := db.Exec("UPDATE feeds SET read = 1 WHERE uuid = ?;", uuid)
-
-	return err
-}
-
-func MarkAsReadInDBByFolder(folder string) error {
-	_, err := db.Exec("UPDATE feeds SET read = 1 WHERE folder = ?;", folder)
-
+func CommitToDB(item *dbFeedItem) error {
+	_, err := db.NamedExec("INSERT INTO feeds VALUES (:uuid,:guid,:title,:link,:author,:feedtitle,:feedlink,:folder,:published);", item)
 	return err
 }

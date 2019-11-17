@@ -1,33 +1,62 @@
 module github.com/Gonzih/feeds2imap-go
 
+go 1.12
+
 require (
-	github.com/PuerkitoBio/goquery v1.4.1
-	github.com/andybalholm/cascadia v1.0.0
-	github.com/emersion/go-imap v0.0.0-20180319181901-b63c7c7011cb
-	github.com/emersion/go-message v0.0.0-20180321064743-9b004c277ed8
-	github.com/emersion/go-sasl v0.0.0-20161116183048-7e096a0a6197
-	github.com/emersion/go-textwrapper v0.0.0-20160606182133-d0e65e56babe
-	github.com/fsnotify/fsnotify v1.4.7
-	github.com/golang/protobuf v1.2.0
-	github.com/google/uuid v0.0.0-20171129191014-dec09d789f3d
-	github.com/hashicorp/hcl v0.0.0-20180404174102-ef8a98b0bbce
-	github.com/icza/session v0.0.0-20170619141311-18040e14e048
-	github.com/julienschmidt/httprouter v0.0.0-20180715161854-348b672cd90d
-	github.com/magiconair/properties v1.8.0
-	github.com/mattn/go-sqlite3 v1.9.0
-	github.com/mitchellh/mapstructure v0.0.0-20180715050151-f15292f7a699
-	github.com/mmcdole/gofeed v0.0.0-20180220200145-0a05f076cc7a
-	github.com/mmcdole/goxpp v0.0.0-20170720115402-77e4a51a73ed
-	github.com/pelletier/go-toml v1.2.0
-	github.com/spf13/afero v1.1.1
-	github.com/spf13/cast v1.2.0
-	github.com/spf13/jwalterweatherman v0.0.0-20180814060501-14d3d4c51834
-	github.com/spf13/pflag v1.0.2
-	github.com/spf13/viper v1.1.0
-	golang.org/x/net v0.0.0-20180821023952-922f4815f713
-	golang.org/x/sys v0.0.0-20180821140842-3b58ed4ad339
-	golang.org/x/text v0.3.0
-	google.golang.org/appengine v1.1.0
-	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
-	gopkg.in/yaml.v2 v2.2.1
+	cloud.google.com/go v0.43.0 // indirect
+	github.com/OneOfOne/xxhash v1.2.5 // indirect
+	github.com/PuerkitoBio/goquery v1.5.0 // indirect
+	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751 // indirect
+	github.com/alecthomas/units v0.0.0-20190717042225-c3de453c63f4 // indirect
+	github.com/coreos/bbolt v1.3.3 // indirect
+	github.com/coreos/etcd v3.3.13+incompatible // indirect
+	github.com/coreos/go-semver v0.3.0 // indirect
+	github.com/coreos/go-systemd v0.0.0-20190719114852-fd7a80b32e1f // indirect
+	github.com/dgryski/go-sip13 v0.0.0-20190329191031-25c5027a8c7b // indirect
+	github.com/emersion/go-imap v1.0.1
+	github.com/emersion/go-message v0.10.8
+	github.com/emersion/go-sasl v0.0.0-20190704090222-36b50694675c // indirect
+	github.com/go-kit/kit v0.9.0 // indirect
+	github.com/go-sql-driver/mysql v1.4.1 // indirect
+	github.com/golang/groupcache v0.0.0-20190702054246-869f871628b6 // indirect
+	github.com/google/pprof v0.0.0-20190723021845-34ac40c74b70 // indirect
+	github.com/google/uuid v1.1.1
+	github.com/grpc-ecosystem/grpc-gateway v1.9.5 // indirect
+	github.com/hashicorp/golang-lru v0.5.3 // indirect
+	github.com/jmoiron/sqlx v1.2.0
+	github.com/kisielk/errcheck v1.2.0 // indirect
+	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
+	github.com/kr/pty v1.1.8 // indirect
+	github.com/lib/pq v1.2.0 // indirect
+	github.com/magiconair/properties v1.8.1 // indirect
+	github.com/martinlindhe/base36 v1.0.0 // indirect
+	github.com/mattn/go-sqlite3 v1.12.0
+	github.com/mmcdole/gofeed v1.0.0-beta2
+	github.com/mmcdole/goxpp v0.0.0-20181012175147-0068e33feabf // indirect
+	github.com/mwitkow/go-conntrack v0.0.0-20190716064945-2f068394615f // indirect
+	github.com/pelletier/go-toml v1.4.0 // indirect
+	github.com/pkg/errors v0.8.1 // indirect
+	github.com/prometheus/client_golang v1.1.0 // indirect
+	github.com/prometheus/tsdb v0.10.0 // indirect
+	github.com/rogpeppe/fastuuid v1.2.0 // indirect
+	github.com/sirupsen/logrus v1.4.2 // indirect
+	github.com/spaolacci/murmur3 v1.1.0 // indirect
+	github.com/spf13/afero v1.2.2 // indirect
+	github.com/spf13/jwalterweatherman v1.1.0 // indirect
+	github.com/spf13/pflag v1.0.5
+	github.com/spf13/viper v1.4.0
+	github.com/stretchr/objx v0.2.0 // indirect
+	github.com/stretchr/testify v1.4.0
+	github.com/ugorji/go v1.1.7 // indirect
+	go.etcd.io/bbolt v1.3.3 // indirect
+	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4 // indirect
+	golang.org/x/exp v0.0.0-20190731235908-ec7cb31e5a56 // indirect
+	golang.org/x/image v0.0.0-20190802002840-cff245a6509b // indirect
+	golang.org/x/mobile v0.0.0-20190719004257-d2bd2a29d028 // indirect
+	golang.org/x/net v0.0.0-20190724013045-ca1201d0de80 // indirect
+	golang.org/x/sys v0.0.0-20190804053845-51ab0e2deafa // indirect
+	golang.org/x/tools v0.0.0-20190802220118-1d1727260058 // indirect
+	google.golang.org/genproto v0.0.0-20190801165951-fa694d86fc64 // indirect
+	google.golang.org/grpc v1.22.1 // indirect
+	honnef.co/go/tools v0.0.1-2019.2.2 // indirect
 )

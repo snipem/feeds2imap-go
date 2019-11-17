@@ -16,10 +16,6 @@ func init() {
 	pflag.Parse()
 	viper.BindPFlags(pflag.CommandLine)
 
-	viper.SetDefault("web.host", "0.0.0.0")
-	viper.SetDefault("web.port", 8080)
-	viper.SetDefault("web.installationpath", ".")
-
 	viper.SetConfigFile(viper.GetString("config"))
 
 	err := viper.ReadInConfig()
@@ -34,9 +30,6 @@ func init() {
 
 func main() {
 	defer feeds2imap.CloseDB()
-	if viper.GetBool("daemon.enabled") && viper.GetBool("web.enabled") {
-		go feeds2imap.StartHTTPD()
-	}
 
 	for {
 		items := feeds2imap.FetchNewFeedItems()

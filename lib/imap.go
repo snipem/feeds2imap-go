@@ -10,11 +10,18 @@ import (
 	"strings"
 	"time"
 
+	"github.com/emersion/go-imap"
 	"github.com/emersion/go-imap/client"
 	"github.com/emersion/go-message/mail"
 	"github.com/mmcdole/gofeed"
 	"github.com/spf13/viper"
 )
+
+type imapClient interface {
+	Logout() error
+	Create(string) error
+	Append(string, []string, time.Time, imap.Literal) error
+}
 
 var templateFuncs = template.FuncMap{
 	"emptyString": func(s string) bool {
@@ -110,12 +117,22 @@ func newMessage(item *gofeed.Item, feedTitle string) (bytes.Buffer, error) {
 		fromName = viper.GetString("imap.from.name")
 	}
 
-	from := []*mail.Address{{fromName, viper.GetString("imap.from.email")}}
-	to := []*mail.Address{{viper.GetString("imap.to.name"), viper.GetString("imap.to.email")}}
+	from := []*mail.Address{
+		{
+			Name:    fromName,
+			Address: viper.GetString("imap.from.email"),
+		},
+	}
+	to := []*mail.Address{
+		{
+			Name:    viper.GetString("imap.to.name"),
+			Address: viper.GetString("imap.to.email"),
+		},
+	}
 
 	mediaParams := map[string]string{"charset": "utf-8"}
 
-	h := mail.NewHeader()
+	var h mail.Header
 	h.SetContentType("multipart/alternative", mediaParams)
 	h.SetDate(*item.PublishedParsed)
 	h.SetAddressList("From", from)
@@ -128,9 +145,9 @@ func newMessage(item *gofeed.Item, feedTitle string) (bytes.Buffer, error) {
 		return b, err
 	}
 
-	htmlHeader := mail.NewTextHeader()
+	var htmlHeader mail.InlineHeader
 	htmlHeader.SetContentType("text/html", mediaParams)
-	htmlWriter, err := messageWriter.CreateSingleText(htmlHeader)
+	htmlWriter, err := messageWriter.CreateSingleInline(htmlHeader)
 	defer htmlWriter.Close()
 	if err != nil {
 		return b, err
@@ -164,16 +181,7 @@ func newIMAPClient() (*client.Client, error) {
 	return c, nil
 }
 
-// AppendNewItemsViaIMAP puts items in to corresponding imap folders
-func AppendNewItemsViaIMAP(items ItemsWithFolders) (ItemsWithFolders, error) {
-	client, err := newIMAPClient()
-	if err != nil {
-		return nil, err
-	}
-	defer client.Logout()
-
-	var i []ItemWithFolder
-
+func appendNewItemsVia(items ItemsWithFolders, client imapClient) error {
 	for _, entry := range items {
 		if entry.Item.PublishedParsed == nil {
 			t := time.Now()
@@ -215,4 +223,15 @@ func AppendNewItemsViaIMAP(items ItemsWithFolders) (ItemsWithFolders, error) {
 	}
 
 	return i, nil
+}
+
+// AppendNewItemsViaIMAP puts items in to corresponding imap folders
+func AppendNewItemsViaIMAP(items ItemsWithFolders) error {
+	client, err := newIMAPClient()
+	if err != nil {
+		return err
+	}
+	defer client.Logout()
+
+	return appendNewItemsVia(items, client)
 }
